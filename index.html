@@ -12,7 +12,6 @@
     <!-- Hero Section -->
     <section class="hero">
         <div class="overlay"></div>
-        <!-- Replace this URL with your own pre-wedding photo -->
         <img class="hero-image" src="https://cdn.shopify.com/s/files/1/0810/7710/8982/files/fd3f8eaaafc3bbc89be9a18ea0ed198a.jpg?v=1785688879" alt="Bride and Groom">
         <div class="hero-text">
             <h3>Սիրով սպասում ենք</h3>
@@ -82,21 +81,20 @@
     <section class="rsvp" id="rsvp">
         <h2>Խնդրում ենք նախապես տեղեկացնել Ձեր մասնակցության մասին մինչև Մայիսի 30-ը</h2>
         
-        <!-- IMPORTANT: Replace "YOUR_FORMSPREE_ENDPOINT" with your actual Formspree URL (see Step 2) -->
-        <form action="https://formspree.io/f/xlgqqeke" method="POST" class="rsvp-form">
+        <form id="rsvpForm" class="rsvp-form">
             <div class="form-group">
                 <label>Կկարողանա՞ք մասնակցել</label>
                 <div class="radio-group">
-                    <label><input type="radio" name="attendance" value="yes" required> Այո, սիրով կմասնակցեմ</label>
-                    <label><input type="radio" name="attendance" value="no"> Ոչ, ցավոք չեմ կարողանա մասնակցել</label>
+                    <label><input type="radio" name="attendance" value="Yes" required> Այո, սիրով կմասնակցեմ</label>
+                    <label><input type="radio" name="attendance" value="No"> Ոչ, ցավոք չեմ կարողանա մասնակցել</label>
                 </div>
             </div>
             
             <div class="form-group">
                 <label>Ու՞մ կողմից եք</label>
                 <div class="radio-group">
-                    <label><input type="radio" name="side" value="hayk" required> Հայկի</label>
-                    <label><input type="radio" name="side" value="ruzanna"> Ռուզաննայի</label>
+                    <label><input type="radio" name="side" value="Hayk" required> Հայկի</label>
+                    <label><input type="radio" name="side" value="Ruzanna"> Ռուզաննայի</label>
                 </div>
             </div>
 
@@ -105,7 +103,8 @@
                 <input type="text" id="name" name="name" required placeholder="Ձեր անունը">
             </div>
 
-            <button type="submit" class="button submit-btn">Պատասխանել</button>
+            <button type="submit" class="button submit-btn" id="submitBtn">Պատասխանել</button>
+            <p id="formMessage" style="margin-top: 15px; color: #2e7d32; font-weight: 500; display: none;">Շնորհակալություն: Ձեր պատասխանը հաջողությամբ գրանցվեց:</p>
         </form>
     </section>
 
@@ -113,6 +112,61 @@
         <p>Հայկ & Ռուզաննա | 14.06.2026</p>
     </footer>
 
-    <script src="script.js"></script>
+    <!-- JavaScript for Countdown and Form Submission -->
+    <script>
+        // 1. Countdown Timer
+        const countDownDate = new Date("June 14, 2026 14:30:00").getTime();
+        const x = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = countDownDate - now;
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById("days").innerText = days < 10 ? "0" + days : days;
+            document.getElementById("hours").innerText = hours < 10 ? "0" + hours : hours;
+            document.getElementById("minutes").innerText = minutes < 10 ? "0" + minutes : minutes;
+            document.getElementById("seconds").innerText = seconds < 10 ? "0" + seconds : seconds;
+
+            if (distance < 0) {
+                clearInterval(x);
+                document.querySelector(".countdown").innerHTML = "<h2>Մենք արդեն ամուսնացած ենք!</h2>";
+            }
+        }, 1000);
+
+        // 2. Google Sheets Form Submission
+        const form = document.getElementById('rsvpForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const formMessage = document.getElementById('formMessage');
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbyZZXppU68q78a9_RKX3wdDGyc0WyrOB0dhrKycBMSTFRKkxEFREzIByoEDVARKfvSL/exec';
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Ուղարկվում է...';
+            
+            fetch(scriptURL, { method: 'POST', body: new FormData(form)})
+                .then(response => {
+                    form.reset();
+                    submitBtn.innerText = 'Պատասխանել';
+                    submitBtn.disabled = false;
+                    formMessage.style.display = 'block';
+                    
+                    // Hide success message after 5 seconds
+                    setTimeout(() => {
+                        formMessage.style.display = 'none';
+                    }, 5000);
+                })
+                .catch(error => {
+                    alert('Սխալ։ Խնդրում ենք փորձել կրկին։');
+                    submitBtn.innerText = 'Պատասխանել';
+                    submitBtn.disabled = false;
+                    console.error('Error!', error.message);
+                });
+        });
+    </script>
+
 </body>
 </html>
